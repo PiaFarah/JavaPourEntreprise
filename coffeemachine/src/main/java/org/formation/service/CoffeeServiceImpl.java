@@ -4,16 +4,19 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.formation.dto.CoffeeCreateDto;
 import org.formation.dto.CoffeeDto;
+import org.formation.dto.CoffeeUpdateDto;
 import org.formation.entity.Coffee;
 import org.formation.mapper.CoffeeMapper;
 import org.formation.repository.CoffeeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+
 public class CoffeeServiceImpl implements CoffeeService {
 
     private final CoffeeRepository repository;
@@ -47,9 +50,14 @@ public class CoffeeServiceImpl implements CoffeeService {
         return  mapper.toDto(saved) ;
     }
 
-
+    @Transactional //pour laisser lentity manager ouvert et envoie le changement au repository avant la derniere accolade
     @Override
-    public CoffeeDto updateCoffee(CoffeeDto coffeeDto) {
-        return null;
+    public Optional<CoffeeDto> update(Long id, CoffeeUpdateDto dto) {
+        return  repository.findById(id).map(existing -> {
+            mapper.updateEntity(existing, dto); //recopier les valeurs dans dto
+            return mapper.toDto(existing);
+        });
+
     }
+
 }
